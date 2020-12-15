@@ -1,0 +1,9 @@
+{
+  "STATUS": {
+    "USED": "USED",
+    "PENDING": "PENDING",
+    "DELETED": "DELETED",
+    "BLOCKED": "BLOCKED",
+    "REJECTED": "REJECTED"
+  }
+}

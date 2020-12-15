@@ -1,0 +1,7 @@
+{
+  "errorMessages": {
+    "LOGIN_FAIL": "Wrong username or password, please try again",
+    "EMAIL_EXISTED": "This email has been taken, please try another email",
+    "BOOK_NOT_EXISTED": "Book does not exist"
+  }
+}
