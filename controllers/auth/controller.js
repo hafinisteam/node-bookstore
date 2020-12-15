@@ -33,8 +33,8 @@ const AuthController = {
         req.body.password,
         user.password
       );
+      
       if (!passwordMatched) {
-
         return Utils.handleError(res, ErrorCode.LOGIN_FAIL);
       }
       let token = jwt.sign({ _id: user._id }, process.env.SESSION_SECRET, {
@@ -52,7 +52,6 @@ const AuthController = {
         token,
       });
     } catch (error) {
-      console.log(errorMessages);
       return Utils.handleError(res, ErrorCode.LOGIN_FAIL);
     }
   },

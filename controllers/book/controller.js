@@ -53,8 +53,14 @@ module.exports = {
       return Utils.handleSuccess(res, {
         book: bookInfor,
       });
-    } catch (error) {
-      return Utils.handleError(res, error);
+    } catch (err) {
+      if (
+        err.name === "MongoError" &&
+        (err.code === 11000 || err.code === 11001)
+      ) {
+        return Utils.handleError(res, ErrorCode.BOOK_TITLE_EXISTED);
+      }
+      return Utils.handleError(res, err);
     }
   },
   addReview: async (req, res) => {

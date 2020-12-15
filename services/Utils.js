@@ -11,14 +11,15 @@ const Util = {
         message: error.details,
       })
     } 
-    if(error) {
+    if(typeof error === 'object') {
       return res.send({
         status: 200,
-        code: ErrorCode.OTHER_ERROR,
+        code: error.code,
         message: error.message,
       })
     }
-    const resMessage = errorMessages[error]
+    const errorCode = error
+    const resMessage = errorMessages[errorCode]
     const response = {
       code: error,
       message: resMessage ? resMessage : error,
