@@ -5,7 +5,6 @@ async function start(){
   await migration.Author.up()
   await migration.BookFormat.up()
   await migration.Book.up()
-
   mongoose.connection.close()
 }
 
