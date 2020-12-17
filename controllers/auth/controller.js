@@ -4,7 +4,6 @@ const EMAIL_REGEX = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,10}/i;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../../models/User");
-const errorMessages = nconf.get("errorMessages");
 
 require("dotenv").config();
 
