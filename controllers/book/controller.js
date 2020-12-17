@@ -5,11 +5,19 @@ const Joi = require("joi");
 module.exports = {
   getList: async (req, res) => {
     try {
+      let { page, limit } = req.query
+      page = page ? parseInt(page) : 1;
+      limit = limit ? parseInt(limit) : 5;
+      const offset = (page - 1) * limit
       const books = await Book.find({})
+        .skip(offset)
+        .limit(limit)
+        .select('title thumbnails')
         .populate("authors")
         .populate("prices.format", "name")
         .exec();
-      return Utils.handleSuccess(res, books);
+      const total = await Book.countDocuments();
+      return Utils.handleSuccess(res, { books, total });
     } catch (error) {
       console.log(error);
     }

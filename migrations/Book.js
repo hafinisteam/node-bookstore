@@ -7,7 +7,7 @@ const readdir = promisify(require("fs").readdir);
 module.exports = {
   up: async () => {
     try {
-      await db.Book.deleteMany({})
+      // await db.Book.deleteMany({})
       const authors = await db.Author.find({});
       const format = await db.BookFormat.find({});
       const files = await readdir(
@@ -15,7 +15,7 @@ module.exports = {
       );
       const hiddenFileRegex = /(^|\/)\.[^\/\.]/g;
       const images = files.filter((item) => !hiddenFileRegex.test(item));
-      const books = [...Array(5)].map(() => ({
+      const books = [...Array(10)].map(() => ({
         title: faker.commerce.productName(),
         description: faker.commerce.productDescription(),
         thumbnails: [_.sample(images)],
