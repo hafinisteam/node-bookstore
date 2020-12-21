@@ -137,6 +137,7 @@ module.exports = {
         }
       }, function(err, doc){
         return Utils.handleSuccess(res, doc)
+        
       })
     } catch (error) {
       console.log(error)
