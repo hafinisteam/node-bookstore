@@ -5,14 +5,14 @@ const Joi = require("joi");
 module.exports = {
   getList: async (req, res) => {
     try {
-      let { page, limit } = req.query
+      let { page, limit } = req.query;
       page = page ? parseInt(page) : 1;
       limit = limit ? parseInt(limit) : 5;
-      const offset = (page - 1) * limit
+      const offset = (page - 1) * limit;
       const books = await Book.find({})
         .skip(offset)
         .limit(limit)
-        .select('title thumbnails')
+        .select("title thumbnails")
         .populate("authors")
         .populate("prices.format", "name")
         .exec();
@@ -79,13 +79,17 @@ module.exports = {
       if (!req.user) {
         return Utils.handleError(res, ErrorCode.PERMISSION);
       }
+      
       const schema = Joi.object().keys({
         owner: Joi.string().required(),
         book_id: Joi.string().required(),
         star: Joi.number().max(5).required(),
         detail: Joi.string().required(),
       });
-      const result = schema.validate(req.body);
+      const result = schema.validate({
+        ...req.body,
+        owner: req.user._id.toString(),
+      });
       if (result.error) {
         return Utils.handleError(res, result.error);
       }
@@ -102,6 +106,41 @@ module.exports = {
     } catch (error) {
       console.log(error);
       return Utils.handleError(res, error);
+    }
+  },
+  removeReview: async (req, res) => {
+    try {
+      if(!req.user){
+        return Utils.handleError(res, ErrorCode.PERMISSION)
+      }
+      if(!req.params.reviewID){
+        return Utils.handleError(res, {
+          message: 'Missing review ID'
+        })
+      }
+      const review = await Review.findOne({ _id: req.params.reviewID})
+      if(!review){
+        return Utils.handleError(res, ErrorCode.REVIEW_NOT_EXISTED)
+      }
+      if(!review.owner.equals(req.user._id)){
+        return Utils.handleError(res, ErrorCode.PERMISSION)
+      }
+      await review.deleteOne()
+      await Book.findOneAndUpdate(
+        { 
+          rating: { 
+            $in: [req.params.reviewID] 
+          } 
+        }, {
+        $pull: {
+          rating: req.params.reviewID
+        }
+      }, function(err, doc){
+        return Utils.handleSuccess(res, doc)
+      })
+    } catch (error) {
+      console.log(error)
+      return Utils.handleError(res, error)
     }
   },
 };

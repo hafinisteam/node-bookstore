@@ -14,7 +14,7 @@ const Util = {
     if(typeof error === 'object') {
       return res.send({
         status: 200,
-        code: error.code,
+        code: error.code || 'UNDEFINED',
         message: error.message,
       })
     }
@@ -26,12 +26,12 @@ const Util = {
     }
     res.json(response)
   },
-  handleSuccess(res, data) {
+  handleSuccess(res, data = {}) {
     const response = {
       status: 200,
       code: "SUCCESS",
       message: '',
-      data: data ? data : {}
+      data
     }
     return res.json(response)
   }

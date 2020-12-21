@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server",
-    "seed": "node migration"
+    "seed": "node migration",
+    "init:db": "~/mongodb/bin/mongod --dbpath=/Users/hafinisteam/mongodb-data"
   },
   "keywords": [],
   "author": "",
