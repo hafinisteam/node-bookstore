@@ -11,6 +11,7 @@ const passport = require("passport");
 
 let server = (module.exports = {});
 const initializePassport = require("./lib/passport");
+const ErrorHandler = require('./middleware/ErrorHandler')
 const Utils = require("./services/Utils");
 const Constants = require('./config/constant')
 const ErrorCode = require('./config/response')
@@ -52,6 +53,8 @@ server.start = function (callback) {
     }),
     apiRoutes
   );
+
+  app.use(ErrorHandler)
 
   app.listen(PORT, (err) => {
     if (err) throw new Error(err);

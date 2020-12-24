@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const bcript = require("bcryptjs");
+const bcrypt = require("bcryptjs");
 const ROLES = {
   ADMIN: "ADMIN",
   USER: "USER",
@@ -7,12 +7,18 @@ const ROLES = {
 
 const schema = new mongoose.Schema(
   {
-    firstName: { type: String },
-    lastName: { type: String },
-    displayName: { type: String },
+    firstName: String,
+    lastName: String,
+    displayName: String,
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true, minlength: 6 },
     role: { type: String, enum: Object.values(ROLES), default: ROLES.USER },
+    verified: Boolean,
+    verificationToken: String,
+    resetPasswordToken: {
+      token: String,
+      expires: Date,
+    },
   },
   {
     timestamps: true,
@@ -21,20 +27,23 @@ const schema = new mongoose.Schema(
   }
 );
 
-schema.virtual("fullName").get(function () {
-  return this.firstName + "" + this.lastName;
-});
-
-function hasPassword(password, cb) {
-  bcript.hash(password, 10, cb);
+function hashPassword(password, cb) {
+  bcrypt.hash(password, 10, cb);
 }
+
+schema.virtual("isVefified").get(function (params) {
+  return !!(this.verified || this.passwordReset);
+});
 
 schema.pre("save", function (next) {
   var user = this;
   if (!user.password || !user.isModified("password")) {
     return next();
   }
-  hasPassword(user.password, function (err, hashed) {
+  if (!user.displayName) {
+    user.displayName = this.firstName + " " + this.lastName;
+  }
+  hashPassword(user.password, function (err, hashed) {
     if (err) return next(err);
     user.password = hashed;
     next();
@@ -43,7 +52,7 @@ schema.pre("save", function (next) {
 
 schema.method.comparePassword = function (password) {
   return new Promise((resolve, reject) => {
-    bcript.compare(password, this.password, function (err, isMatch) {
+    bcrypt.compare(password, this.password, function (err, isMatch) {
       if (err) return reject(err);
       resolve(isMatch);
     });

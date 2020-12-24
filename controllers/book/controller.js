@@ -128,9 +128,7 @@ module.exports = {
       await review.deleteOne()
       await Book.findOneAndUpdate(
         { 
-          rating: { 
-            $in: [req.params.reviewID] 
-          } 
+          _id: review.product
         }, {
         $pull: {
           rating: req.params.reviewID
