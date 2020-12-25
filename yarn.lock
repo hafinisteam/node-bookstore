@@ -565,6 +565,11 @@ core-util-is@^1.0.1, core-util-is@^1.0.2, core-util-is@~1.0.0, core-util-is@~1.0
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
   integrity sha1-tf1UIgqivFq1eqtxQMlAdUUDwac=
 
+cripto@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/cripto/-/cripto-1.0.1.tgz#57e751ef02d4c6158e4369aad9575a92af43278b"
+  integrity sha512-tuS+S73T2/9TLA9R6Wz/lHrj2xF2H829PYBU2GEzdOgRsvVp4lJC6Ary9iOw1uEwTF2rbObolaFmRflr01ew7A==
+
 crypto-random-string@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-2.0.0.tgz#ef2a7a966ec11083388369baa02ebead229b30d5"
@@ -1628,6 +1633,11 @@ node-addon-api@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-3.0.2.tgz#04bc7b83fd845ba785bb6eae25bc857e1ef75681"
   integrity sha512-+D4s2HCnxPd5PjjI0STKwncjXTUKKqm74MDMz9OPXavjsGmjkvwgLtA5yoxJUdmpj52+2u+RrXgPipahKczMKg==
+
+nodemailer@^6.4.17:
+  version "6.4.17"
+  resolved "https://registry.yarnpkg.com/nodemailer/-/nodemailer-6.4.17.tgz#8de98618028953b80680775770f937243a7d7877"
+  integrity sha512-89ps+SBGpo0D4Bi5ZrxcrCiRFaMmkCt+gItMXQGzEtZVR3uAD3QAQIDoxTWnx3ky0Dwwy/dhFrQ+6NNGXpw/qQ==
 
 nodemon@^2.0.4:
   version "2.0.4"

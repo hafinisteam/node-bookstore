@@ -13,12 +13,13 @@ const schema = new mongoose.Schema(
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true, minlength: 6 },
     role: { type: String, enum: Object.values(ROLES), default: ROLES.USER },
-    verified: Boolean,
+    verified: Date,
     verificationToken: String,
     resetPasswordToken: {
       token: String,
       expires: Date,
     },
+    passwordReset: Date,
   },
   {
     timestamps: true,
@@ -40,9 +41,6 @@ schema.pre("save", function (next) {
   if (!user.password || !user.isModified("password")) {
     return next();
   }
-  if (!user.displayName) {
-    user.displayName = this.firstName + " " + this.lastName;
-  }
   hashPassword(user.password, function (err, hashed) {
     if (err) return next(err);
     user.password = hashed;
@@ -62,6 +60,7 @@ schema.method.comparePassword = function (password) {
 schema.options.toJSON = {
   transform: function (doc, ret, opts) {
     delete ret.password;
+    delete ret.verificationToken;
     return ret;
   },
 };

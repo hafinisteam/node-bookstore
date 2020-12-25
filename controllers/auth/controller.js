@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const User = require("../../models/User");
+const sendMail = require("../../lib/sendMail");
+const crypto = require("crypto");
 
 require("dotenv").config();
 
@@ -9,10 +11,16 @@ const AuthController = {
     try {
       const user = await User.findOne({ email: req.body.email });
 
-      if (!user || !bcrypt.compareSync(req.body.password, user.password))
+      if (
+        !user ||
+        !user.isVefified ||
+        !bcrypt.compareSync(req.body.password, user.password)
+      )
         throw ErrorCode.LOGIN_FAIL;
 
-      let token = jwt.sign({ _id: user._id }, process.env.SESSION_SECRET, { expiresIn: process.env.JWT_EXPIRATION });
+      let token = jwt.sign({ _id: user._id }, process.env.SESSION_SECRET, {
+        expiresIn: process.env.JWT_EXPIRATION,
+      });
 
       user.lastActivity = new Date();
       const userInfor = await user.save();
@@ -33,21 +41,56 @@ const AuthController = {
       const token = jwt.sign({ _id: user._id }, process.env.SESSION_SECRET, {
         expiresIn: process.env.JWT_EXPIRATION,
       });
-      const newUser = await user.save();
+      user.verificationToken = randomTokenString();
+      const account = await user.save();
+      await sendVerificationEmail(account);
       return Utils.handleSuccess(res, {
-        user: newUser,
+        user: account,
         token: `${token}`,
       });
     } catch (err) {
+      console.log(err);
       if (
         err.name === "MongoError" &&
         (err.code === 11000 || err.code === 11001)
       ) {
         next(ErrorCode.EMAIL_EXISTED);
       }
-      next(err)
+      next(err);
+    }
+  },
+  async verifyEmail(req, res, next) {
+    try {
+      const account = await User.findOne({ verificationToken: req.body.token });
+      if (!account) throw ErrorCode.USER_NOT_EXIST;
+      account.verificationToken = undefined;
+      account.verified = Date.now();
+      await account.save();
+      return Utils.handleSuccess(res);
+    } catch (error) {
+      next(error);
     }
   },
 };
+
+function randomTokenString() {
+  return crypto.randomBytes(40).toString("hex");
+}
+
+async function sendVerificationEmail(account) {
+  const message = `
+    <p>Please use the below token to verify your email address with the <code>/auth/verify-email</code> api route:</p>
+    <p><code>${account.verificationToken}</code></p>
+  `;
+  await sendMail({
+    to: account.email,
+    subject: "Sign-up Verification API - Verify Email",
+    html: `
+      <h4>Verify Email</h4>
+      <p>Thanks for registering!</p>
+      ${message}
+    `,
+  });
+}
 
 module.exports = AuthController;

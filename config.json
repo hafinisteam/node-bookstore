@@ -1,0 +1,11 @@
+{
+  "emailFrom": "info@node-mongo-signup-verification-api.com",
+  "smtConfig": {
+    "host": "smtp.ethereal.email",
+    "port": 587,
+    "auth": {
+        "user": "joey.larkin48@ethereal.email ",
+        "pass": "5FnY6BUBR51qSGBzse"
+    }
+  }
+}
