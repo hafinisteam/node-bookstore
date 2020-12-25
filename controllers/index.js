@@ -4,7 +4,7 @@ const authorRoutes = require('./author')
 const mediaRoutes = require('./media')
 const bookRoutes = require('./book')
 
-let routes = new express.Router()
+const routes = new express.Router()
 
 routes.use('/user', userRoutes)
 routes.use('/author', authorRoutes)

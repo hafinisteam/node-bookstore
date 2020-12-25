@@ -4,7 +4,7 @@ const crypto = require("crypto");
 
 require("dotenv").config();
 
-const AuthController = {
+const UserController = {
   async forgotPassword(req, res, next) {
     try {
       const account = await User.findOne({ email: req.body.email });
@@ -35,6 +35,21 @@ const AuthController = {
       next(error);
     }
   },
+  async updateProfile(req, res, next) {
+    try {
+      let account = await User.findOne({ _id: req.user.id })
+      console.log(account)
+      if(!account) throw ErrorCode.USER_NOT_EXIST
+      Object.assign(account, req.body)
+      await account.save()
+      return Utils.handleSuccess(res)
+    } catch (error) {
+      if(Utils.checkMongoDuplicate(error)){
+        next(ErrorCode.EMAIL_EXISTED)
+      }
+      next(error)
+    }
+  }
 };
 
 function randomTokenString() {
@@ -56,4 +71,4 @@ async function sendResetPasswordEmail(account) {
   });
 }
 
-module.exports = AuthController;
+module.exports = UserController;

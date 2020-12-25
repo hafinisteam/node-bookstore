@@ -1,5 +1,5 @@
-const UserController = require("./controller");
 const express = require("express");
+const UserController = require("./controller");
 const validateRequest = require('../../lib/validateRequest')
 const Joi = require('joi')
 const { regex } = require('../../config/constant')
@@ -16,12 +16,23 @@ const forgotPasswordSchema = (req, res, next) => {
 const resetPasswordSchema = (req, res, next) => {
   const schema = Joi.object().keys({
     token: Joi.string().required(),
-    password: Joi.string().required
+    password: Joi.string().required()
   });
   validateRequest(req, next, schema)
 }
+
+const updateProfileSchema = (req, res, next) => {
+  const schema = Joi.object().keys({
+    lastName: Joi.string(),
+    firstName: Joi.string(),
+    displayName: Joi.string(),
+    email: Joi.string().regex(regex.EMAIL_REGEX)
+  })
+  validateRequest(req, next, schema)
+}
+
 routes.post('/forgot-password', forgotPasswordSchema, UserController.forgotPassword)
 routes.post('/reset-password', resetPasswordSchema, UserController.resetPassword)
-
+routes.post('/update-profile', updateProfileSchema, UserController.updateProfile)
 
 module.exports = routes

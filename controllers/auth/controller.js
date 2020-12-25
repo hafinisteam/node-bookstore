@@ -11,12 +11,10 @@ const AuthController = {
     try {
       const user = await User.findOne({ email: req.body.email });
 
-      if (
-        !user ||
-        !user.isVefified ||
-        !bcrypt.compareSync(req.body.password, user.password)
-      )
+      if (!user || !bcrypt.compareSync(req.body.password, user.password))
         throw ErrorCode.LOGIN_FAIL;
+
+      if (!user.isVefified) throw ErrorCode.EMAIL_NEED_VERIFY;
 
       let token = jwt.sign({ _id: user._id }, process.env.SESSION_SECRET, {
         expiresIn: process.env.JWT_EXPIRATION,
