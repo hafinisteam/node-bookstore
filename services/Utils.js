@@ -34,6 +34,13 @@ const Util = {
       data
     }
     return res.json(response)
+  },
+  checkMongoDuplicate(err){
+    if(
+      err.name === "MongoError" &&
+      (err.code === 11000 || err.code === 11001)
+    ) return true
+    else false
   }
 };
 

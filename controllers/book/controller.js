@@ -3,7 +3,7 @@ const Review = require("../../models/Review");
 const Joi = require("joi");
 
 module.exports = {
-  getList: async (req, res) => {
+  getList: async (req, res, next) => {
     try {
       let { page, limit } = req.query;
       page = page ? parseInt(page) : 1;
@@ -20,6 +20,7 @@ module.exports = {
       return Utils.handleSuccess(res, { books, total });
     } catch (error) {
       console.log(error);
+      next(error);
     }
   },
   getByID: (req, res) => {
@@ -28,74 +29,30 @@ module.exports = {
       .populate("prices.format")
       .populate("rating")
       .exec(function (err, book) {
-        if (err) return Utils.handleError(res, ErrorCode.BOOK_NOT_EXISTED);
+        if (err) throw ErrorCode.BOOK_NOT_EXISTED;
         return Utils.handleSuccess(res, { book });
       });
   },
-  createBook: async (req, res) => {
+  createBook: async (req, res, next) => {
     try {
-      if (!req.user) {
-        return Utils.handleError(res, ErrorCode.PERMISSION);
-      }
-      const schema = Joi.object().keys({
-        title: Joi.string().required(),
-        description: Joi.string().required(),
-        authors: Joi.array().required().items(Joi.string().required()),
-        thumbnails: Joi.array().required().items(Joi.string().required()),
-        prices: Joi.array()
-          .required()
-          .items(
-            Joi.object({
-              price: Joi.number().required(),
-              format: Joi.string().required(),
-            })
-          ),
-        quantity: Joi.number().required(),
-      });
-      let result = schema.validate(req.body);
-      if (result.error) {
-        return Utils.handleError(res, result.error);
-      }
       const newBook = new Book(result.value);
       const bookInfor = await newBook.save();
       return Utils.handleSuccess(res, {
         book: bookInfor,
       });
     } catch (err) {
-      if (
-        err.name === "MongoError" &&
-        (err.code === 11000 || err.code === 11001)
-      ) {
-        return Utils.handleError(res, ErrorCode.BOOK_TITLE_EXISTED);
+      if (Utils.checkMongoDuplicate(err)) {
+        next(ErrorCode.BOOK_TITLE_EXISTED);
       }
-      return Utils.handleError(res, err);
+      next(err);
     }
   },
   addReview: async (req, res) => {
     try {
-      if (!req.params.bookID) {
-        return Utils.handleError(res, ErrorCode.BOOK_NOT_EXISTED);
-      }
-      if (!req.user) {
-        return Utils.handleError(res, ErrorCode.PERMISSION);
-      }
-      
-      const schema = Joi.object().keys({
-        owner: Joi.string().required(),
-        book_id: Joi.string().required(),
-        star: Joi.number().max(5).required(),
-        detail: Joi.string().required(),
-      });
-      const result = schema.validate({
-        ...req.body,
-        owner: req.user._id.toString(),
-      });
-      if (result.error) {
-        return Utils.handleError(res, result.error);
-      }
       const book = await Book.findOne({ _id: req.body.book_id });
+
       if (!book) {
-        return Utils.handleError(res, ErrorCode.BOOK_NOT_EXISTED);
+        throw (res, ErrorCode.BOOK_NOT_EXISTED);
       }
 
       const newReview = new Review(result.value);
@@ -110,36 +67,30 @@ module.exports = {
   },
   removeReview: async (req, res) => {
     try {
-      if(!req.user){
-        return Utils.handleError(res, ErrorCode.PERMISSION)
+      if (!req.params.reviewID) {
+        throw ErrorCode.REVIEW_ID_MISSING;
       }
-      if(!req.params.reviewID){
-        return Utils.handleError(res, {
-          message: 'Missing review ID'
-        })
-      }
-      const review = await Review.findOne({ _id: req.params.reviewID})
-      if(!review){
-        return Utils.handleError(res, ErrorCode.REVIEW_NOT_EXISTED)
-      }
-      if(!review.owner.equals(req.user._id)){
-        return Utils.handleError(res, ErrorCode.PERMISSION)
-      }
-      await review.deleteOne()
+      const review = await Review.findOne({ _id: req.params.reviewID });
+      if (!review) throw ErrorCode.REVIEW_NOT_EXISTED;
+      if (!review.owner.equals(req.user._id)) throw ErrorCode.PERMISSION;
+
+      await review.deleteOne();
       await Book.findOneAndUpdate(
-        { 
-          _id: review.product
-        }, {
-        $pull: {
-          rating: req.params.reviewID
+        {
+          _id: review.product,
+        },
+        {
+          $pull: {
+            rating: req.params.reviewID,
+          },
+        },
+        function (err, doc) {
+          return Utils.handleSuccess(res, doc);
         }
-      }, function(err, doc){
-        return Utils.handleSuccess(res, doc)
-        
-      })
+      );
     } catch (error) {
-      console.log(error)
-      return Utils.handleError(res, error)
+      console.log(error);
+      next(error);
     }
   },
 };
