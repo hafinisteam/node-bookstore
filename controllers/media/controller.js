@@ -2,7 +2,6 @@ const multer = require("multer");
 const sharp = require("sharp");
 const fs = require("fs");
 const uploadFile = require("../../middleware/Upload");
-const errorMessages = nconf.get("errorMessages");
 require("dotenv").config();
 
 const MediaController = {

@@ -1,7 +1,7 @@
-const AuthController = require("./controller");
 const express = require("express");
-const validateRequest = require('../../lib/validateRequest')
 const Joi = require('joi')
+const AuthController = require("./controller");
+const validateRequest = require('../../lib/validateRequest')
 const { regex } = require('../../config/constant')
 
 const routes = new express.Router();
