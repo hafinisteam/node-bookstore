@@ -5,10 +5,7 @@ const Joi = require("joi");
 module.exports = {
   getList: async (req, res, next) => {
     try {
-      let { page, limit } = req.query;
-      page = page ? parseInt(page) : 1;
-      limit = limit ? parseInt(limit) : 5;
-      const offset = (page - 1) * limit;
+      const { offset, limit } = Utils.getPagingConfig(req.query)
       const books = await Book.find({})
         .skip(offset)
         .limit(limit)

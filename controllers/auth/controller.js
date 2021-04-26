@@ -9,19 +9,21 @@ require("dotenv").config();
 const AuthController = {
   async login(req, res, next) {
     try {
+      // Find if user exist with email
       const user = await User.findOne({ email: req.body.email });
-
+      // If user exists and password comparing match with bcript
       if (!user || !bcrypt.compareSync(req.body.password, user.password))
         throw ErrorCode.LOGIN_FAIL;
-
+      // Check if verified, if not throw error
       if (!user.isVefified) throw ErrorCode.EMAIL_NEED_VERIFY;
-
+      // Create token
       let token = jwt.sign({ _id: user._id }, process.env.SESSION_SECRET, {
         expiresIn: process.env.JWT_EXPIRATION,
       });
 
       user.lastActivity = new Date();
       const userInfor = await user.save();
+      // If userInfor save successfully
       if (userInfor && token) {
         token = `${token}`;
       } else {
@@ -39,6 +41,7 @@ const AuthController = {
       const token = jwt.sign({ _id: user._id }, process.env.SESSION_SECRET, {
         expiresIn: process.env.JWT_EXPIRATION,
       });
+      // Create verification token to send to email
       user.verificationToken = randomTokenString();
       const account = await user.save();
       await sendVerificationEmail(account);
@@ -59,8 +62,10 @@ const AuthController = {
   },
   async verifyEmail(req, res, next) {
     try {
+      // Find user with verification token
       const account = await User.findOne({ verificationToken: req.body.token });
       if (!account) throw ErrorCode.USER_NOT_EXIST;
+      // Clear token 
       account.verificationToken = undefined;
       account.verified = Date.now();
       await account.save();
