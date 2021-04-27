@@ -42,9 +42,9 @@ const AuthController = {
         expiresIn: process.env.JWT_EXPIRATION,
       });
       // Create verification token to send to email
-      user.verificationToken = randomTokenString();
+      // user.verificationToken = randomTokenString();
       const account = await user.save();
-      await sendVerificationEmail(account);
+      // await sendVerificationEmail(account);
       return Utils.handleSuccess(res, {
         user: account,
         token: `${token}`,

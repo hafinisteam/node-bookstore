@@ -11,10 +11,10 @@ const passport = require("passport");
 
 let server = (module.exports = {});
 const initializePassport = require("./lib/passport");
-const ErrorHandler = require('./middleware/ErrorHandler')
+const ErrorHandler = require("./middleware/ErrorHandler");
 const Utils = require("./services/Utils");
-const Constants = require('./config/constant')
-const ErrorCode = require('./config/response')
+const Constants = require("./config/constant");
+const ErrorCode = require("./config/response");
 
 // Load ENV config
 dotenv.config();
@@ -29,16 +29,16 @@ server.start = function (callback) {
   // Set global configuration for constant, utils, error code, ...
   global.nconf = nconf;
   global.Utils = Utils;
-  global.__basedir = path.resolve()
-  global.Constants = Constants
-  global.ErrorCode = ErrorCode
+  global.__basedir = path.resolve();
+  global.Constants = Constants;
+  global.ErrorCode = ErrorCode;
 
   nconf
     .file("commonType", "./config/commonType.json")
     .file("messages", "./config/messages.json");
 
   // Set static path for media such as images
-  app.use('/media', express.static(__dirname + '/media'))
+  app.use("/media", express.static(__dirname + "/media"));
 
   // Parse in-coming request with JSON payload
   app.use(express.json());
@@ -50,13 +50,7 @@ server.start = function (callback) {
   // Init passport hook for token check
   initializePassport(app);
 
-  // Auth route
-  const authRoutes = require("./controllers/auth");
-
-  // All other routes for API data
-  const apiRoutes = require("./controllers");
-
-  app.use("/auth", authRoutes);
+  app.use("/auth", require("./controllers/auth"));
 
   // Authenticate API route with PassportJS
   app.use(
@@ -64,11 +58,13 @@ server.start = function (callback) {
     passport.authenticate("jwt", {
       session: false,
     }),
-    apiRoutes
+    require("./controllers")
   );
 
+  app.use("/api-docs", require("./lib/swagger"));
+
   // Use error handler middleware
-  app.use(ErrorHandler)
+  app.use(ErrorHandler);
 
   // Server listen on PORT
   app.listen(PORT, (err) => {
