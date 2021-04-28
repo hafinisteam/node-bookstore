@@ -8,6 +8,7 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const path = require("path");
 const passport = require("passport");
+const cors = require('cors')
 
 let server = (module.exports = {});
 const initializePassport = require("./lib/passport");
@@ -46,6 +47,7 @@ server.start = function (callback) {
   // Security config with library
   app.use(morgan("combined"));
   app.use(helmet());
+  app.use(cors());
 
   // Init passport hook for token check
   initializePassport(app);
