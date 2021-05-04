@@ -31,8 +31,18 @@ const updateProfileSchema = (req, res, next) => {
   validateRequest(req, next, schema)
 }
 
+const changePasswordSchema = (req, res, next) => {
+  const schema = Joi.object().keys({
+    currentPassword: Joi.string().required(),
+    newPassword: Joi.string().required(),
+    confirmNewPassword: Joi.string().required(),
+  })
+  validateRequest(req, next, schema)
+}
+
 routes.post('/forgot-password', forgotPasswordSchema, UserController.forgotPassword)
 routes.post('/reset-password', resetPasswordSchema, UserController.resetPassword)
 routes.post('/update-profile', updateProfileSchema, UserController.updateProfile)
+routes.post('/change-password', changePasswordSchema, UserController.changePassword)
 
 module.exports = routes

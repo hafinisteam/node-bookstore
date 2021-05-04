@@ -1,6 +1,7 @@
 const User = require("../../models/User");
 const sendMail = require("../../lib/sendMail");
 const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
 
 require("dotenv").config();
 
@@ -17,7 +18,7 @@ const UserController = {
       await sendResetPasswordEmail(account);
       return Utils.handleSuccess(res);
     } catch (error) {
-      next(error)
+      next(error);
     }
   },
   async resetPassword(req, res, next) {
@@ -30,26 +31,45 @@ const UserController = {
       account.password = req.body.password;
       account.passwordReset = Date.now();
       account.resetToken = undefined;
-      return Utils.handleSuccess(res)
+      return Utils.handleSuccess(res);
     } catch (error) {
       next(error);
     }
   },
   async updateProfile(req, res, next) {
     try {
-      let account = await User.findOne({ _id: req.user.id })
-      console.log(account)
-      if(!account) throw ErrorCode.USER_NOT_EXIST
-      Object.assign(account, req.body)
-      await account.save()
-      return Utils.handleSuccess(res)
+      let account = await User.findOne({ _id: req.user.id });
+      if (!account) throw ErrorCode.USER_NOT_EXIST;
+      Object.assign(account, req.body);
+      await account.save();
+      return Utils.handleSuccess(res);
     } catch (error) {
-      if(Utils.checkMongoDuplicate(error)){
-        next(ErrorCode.EMAIL_EXISTED)
+      if (Utils.checkMongoDuplicate(error)) {
+        next(ErrorCode.EMAIL_EXISTED);
       }
-      next(error)
+      next(error);
     }
-  }
+  },
+  async changePassword(req, res, next) {
+    try {
+      let account = await User.findOne({ _id: req.user.id });
+      if (
+        !account ||
+        !bcrypt.compareSync(req.body.currentPassword, account.password)
+      ) {
+        throw ErrorCode.PASSWORD_CHANGE_FAIL;
+      }
+      if (req.body.newPassword !== req.body.confirmNewPassword) {
+        throw ErrorCode.PASSWORD_CHANGE_FAIL;
+      }
+      account.password = req.body.newPassword;
+      await account.save();
+      return Utils.handleSuccess(res);
+    } catch (error) {
+      console.log(error)
+      next(error);
+    }
+  },
 };
 
 function randomTokenString() {
