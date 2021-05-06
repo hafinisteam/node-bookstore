@@ -1,6 +1,8 @@
 const express = require('express')
+const Joi = require('joi')
 const BookController = require('./controller')
 const validateRequest = require('../../lib/validateRequest')
+const AuthenticateRequest = require('../../middleware/AuthenticateRequest')
 
 const routes = express.Router()
 
@@ -24,9 +26,6 @@ const createBookSchema = (req, res, next) => {
 }
 
 const addReviewSchema = (req, res, next) => {
-  if (!req.params.bookID) {
-    throw ErrorCode.BOOK_NOT_EXISTED;
-  }
   const schema = Joi.object().keys({
     owner: Joi.string().required(),
     book_id: Joi.string().required(),
@@ -39,8 +38,8 @@ const addReviewSchema = (req, res, next) => {
 
 routes.get('/', BookController.getList)
 routes.get('/:bookID', BookController.getByID)
-routes.post('/', createBookSchema, BookController.createBook)
-routes.post('/review/:bookID', addReviewSchema, BookController.addReview)
+routes.post('/', AuthenticateRequest, createBookSchema, BookController.createBook)
+routes.post('/review', AuthenticateRequest, addReviewSchema, BookController.addReview)
 routes.delete('/review/:reviewID', BookController.removeReview)
 
 module.exports = routes

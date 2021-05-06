@@ -37,6 +37,7 @@ const changePasswordSchema = (req, res, next) => {
     newPassword: Joi.string().required(),
     confirmNewPassword: Joi.string().required(),
   })
+  console.log(req.user)
   validateRequest(req, next, schema)
 }
 

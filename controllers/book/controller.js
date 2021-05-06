@@ -32,7 +32,7 @@ module.exports = {
   },
   createBook: async (req, res, next) => {
     try {
-      const newBook = new Book(result.value);
+      const newBook = new Book(req.body);
       const bookInfor = await newBook.save();
       return Utils.handleSuccess(res, {
         book: bookInfor,
@@ -52,7 +52,7 @@ module.exports = {
         throw (res, ErrorCode.BOOK_NOT_EXISTED);
       }
 
-      const newReview = new Review(result.value);
+      const newReview = new Review(req.body);
       const savedReview = await newReview.save();
       book.rating.push(savedReview._id);
       const savedBook = await book.save();

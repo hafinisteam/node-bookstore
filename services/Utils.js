@@ -41,7 +41,7 @@ const Util = {
     else false;
   },
   getPagingConfig(query) {
-    let { page, limit } = req.query;
+    let { page, limit } = query;
     page = page ? parseInt(page) : 1;
     limit = limit ? parseInt(limit) : 5;
     const offset = (page - 1) * limit;

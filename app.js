@@ -8,7 +8,7 @@ const morgan = require("morgan");
 const helmet = require("helmet");
 const path = require("path");
 const passport = require("passport");
-const cors = require('cors')
+const cors = require("cors");
 
 let server = (module.exports = {});
 const initializePassport = require("./lib/passport");
@@ -55,13 +55,7 @@ server.start = function (callback) {
   app.use("/auth", require("./controllers/auth"));
 
   // Authenticate API route with PassportJS
-  app.use(
-    "/api",
-    passport.authenticate("jwt", {
-      session: false,
-    }),
-    require("./controllers")
-  );
+  app.use("/api", require("./controllers"));
 
   app.use("/api-docs", require("./lib/swagger"));
 
