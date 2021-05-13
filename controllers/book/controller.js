@@ -1,11 +1,11 @@
 const Book = require("../../models/Book");
 const Review = require("../../models/Review");
-const Joi = require("joi");
+const User = require("../../models/User");
 
 module.exports = {
   getList: async (req, res, next) => {
     try {
-      const { offset, limit } = Utils.getPagingConfig(req.query)
+      const { offset, limit } = Utils.getPagingConfig(req.query);
       const books = await Book.find({})
         .skip(offset)
         .limit(limit)
@@ -47,9 +47,15 @@ module.exports = {
   addReview: async (req, res) => {
     try {
       const book = await Book.findOne({ _id: req.body.book_id });
-
+      let user;
       if (!book) {
         throw (res, ErrorCode.BOOK_NOT_EXISTED);
+      }
+
+      if (req.user) {
+        user = await User.findById(req.user._id);
+        req.body.name = user.firstName + " " + user.lastName;
+        req.body.email = user.email;
       }
 
       const newReview = new Review(req.body);

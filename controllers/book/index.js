@@ -3,6 +3,8 @@ const Joi = require('joi')
 const BookController = require('./controller')
 const validateRequest = require('../../lib/validateRequest')
 const AuthenticateRequest = require('../../middleware/AuthenticateRequest')
+const VerifyToken = require('../../middleware/VerifyToken')
+const { regex } = require('../../config/constant')
 
 const routes = express.Router()
 
@@ -26,20 +28,24 @@ const createBookSchema = (req, res, next) => {
 }
 
 const addReviewSchema = (req, res, next) => {
-  const schema = Joi.object().keys({
-    owner: Joi.string().required(),
-    book_id: Joi.string().required(),
-    star: Joi.number().max(5).required(),
-    detail: Joi.string().required(),
-  });
-  req.body.owner = req.user._id.toString()
-  validateRequest(req, next, schema)
+  try {
+    const schema = Joi.object().keys({
+      book_id: Joi.string().required(),
+      star: Joi.number().max(5).required(),
+      detail: Joi.string().required(),
+      name: Joi.string().min(6).max(30),
+      email: Joi.string().regex(regex.EMAIL_REGEX)
+    });
+    validateRequest(req, next, schema)
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 routes.get('/', BookController.getList)
 routes.get('/:bookID', BookController.getByID)
 routes.post('/', AuthenticateRequest, createBookSchema, BookController.createBook)
-routes.post('/review', AuthenticateRequest, addReviewSchema, BookController.addReview)
+routes.post('/review', addReviewSchema, VerifyToken, BookController.addReview)
 routes.delete('/review/:reviewID', BookController.removeReview)
 
 module.exports = routes

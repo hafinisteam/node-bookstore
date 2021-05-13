@@ -15,8 +15,13 @@ const schema = new mongoose.Schema({
   },
   detail: {
     type: String,
-    required: true,
   },
+  name: {
+    type: String,
+  },
+  email: {
+    type: String
+  }
 });
 
 module.exports = mongoose.model("review", schema);
